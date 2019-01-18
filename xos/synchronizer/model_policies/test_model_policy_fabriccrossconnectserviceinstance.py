@@ -15,10 +15,7 @@
 import unittest
 
 import functools
-from mock import patch, call, Mock, PropertyMock, MagicMock
-import requests_mock
-import multistructlog
-from multistructlog import create_logger
+from mock import patch, Mock
 
 import os
 import sys
@@ -86,15 +83,15 @@ class TestPolicyFabricCrossconnectServiceInstance(unittest.TestCase):
             services_dir,
             [get_models_fn("fabric-crossconnect", "fabric-crossconnect.xproto")],
         )
-        import synchronizers.new_base.modelaccessor
 
         from mock_modelaccessor import MockObjectList
 
         self.MockObjectList = MockObjectList
 
+        from synchronizers.new_base.modelaccessor import model_accessor
+
         from model_policy_fabriccrossconnectserviceinstance import (
             FabricCrossconnectServiceInstancePolicy,
-            model_accessor,
         )
 
         # import all class names to globals
@@ -136,9 +133,7 @@ class TestPolicyFabricCrossconnectServiceInstance(unittest.TestCase):
     def test_handle_update(self):
         with patch.object(
             ServiceInstance.objects, "get_items"
-        ) as serviceinstance_objects, patch.object(
-            FabricCrossconnectServiceInstance, "save"
-        ) as fcsi_save:
+        ) as serviceinstance_objects:
 
             fsi = FabricCrossconnectServiceInstance(
                 id=7777,

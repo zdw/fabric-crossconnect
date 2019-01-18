@@ -14,15 +14,12 @@
 
 from synchronizers.new_base.syncstep import SyncStep, DeferredException
 from synchronizers.new_base.modelaccessor import (
-    model_accessor,
     FabricCrossconnectServiceInstance,
-    ServiceInstance,
     BNGPortMapping,
 )
 
 from xosconfig import Config
 from multistructlog import create_logger
-import urllib
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -121,8 +118,6 @@ class SyncFabricCrossconnectServiceInstance(SyncStep):
             raise DeferredException("Waiting for model_policy to run on fcsi %s" % o.id)
 
         onos = self.get_fabric_onos_info(o)
-
-        si = ServiceInstance.objects.get(id=o.id)
 
         if o.s_tag is None:
             raise Exception(
