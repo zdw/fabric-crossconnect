@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+from __future__ import absolute_import
 from synchronizers.new_base.modelaccessor import FabricCrossconnectServiceInstance
 from synchronizers.new_base.policy import Policy
 

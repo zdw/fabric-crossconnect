@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+from __future__ import absolute_import
 from xosapi.orm import register_convenience_wrapper
 from xosapi.convenience.service import ORMWrapperService
 

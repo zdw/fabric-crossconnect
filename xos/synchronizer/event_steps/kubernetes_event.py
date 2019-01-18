@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
 import json
 from synchronizers.new_base.eventstep import EventStep
 from synchronizers.new_base.modelaccessor import FabricCrossconnectService, Service
