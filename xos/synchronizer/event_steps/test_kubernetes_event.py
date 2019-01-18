@@ -18,19 +18,22 @@ import functools
 from mock import patch, call, Mock, PropertyMock
 import requests_mock
 
-import os, sys
+import os
+import sys
 
 # Hack to load synchronizer framework
-test_path=os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-xos_dir=os.path.join(test_path, "../../..")
+test_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+xos_dir = os.path.join(test_path, "../../..")
 if not os.path.exists(os.path.join(test_path, "new_base")):
-    xos_dir=os.path.join(test_path, "../../../../../../orchestration/xos/xos")
+    xos_dir = os.path.join(test_path, "../../../../../../orchestration/xos/xos")
     services_dir = os.path.join(xos_dir, "../../xos_services")
 sys.path.append(xos_dir)
 sys.path.append(os.path.join(xos_dir, 'synchronizers', 'new_base'))
 # END Hack to load synchronizer framework
 
 # generate model from xproto
+
+
 def get_models_fn(service_name, xproto_name):
     name = os.path.join(service_name, "xos", xproto_name)
     if os.path.exists(os.path.join(services_dir, name)):
@@ -41,6 +44,7 @@ def get_models_fn(service_name, xproto_name):
             return name
     raise Exception("Unable to find service=%s xproto=%s" % (service_name, xproto_name))
 # END generate model from xproto
+
 
 class TestKubernetesEvent(unittest.TestCase):
 
@@ -64,7 +68,7 @@ class TestKubernetesEvent(unittest.TestCase):
             get_models_fn("onos-service", "onos.xproto"),
         ])
         import synchronizers.new_base.mock_modelaccessor
-        reload(synchronizers.new_base.mock_modelaccessor) # in case nose2 loaded it in a previous test
+        reload(synchronizers.new_base.mock_modelaccessor)  # in case nose2 loaded it in a previous test
         import synchronizers.new_base.modelaccessor
         reload(synchronizers.new_base.modelaccessor)      # in case nose2 loaded it in a previous test
         from synchronizers.new_base.modelaccessor import model_accessor
@@ -80,10 +84,10 @@ class TestKubernetesEvent(unittest.TestCase):
 
         self.onos = ONOSService(name="myonos",
                                 id=1111,
-                                rest_hostname = "onos-url",
-                                rest_port = "8181",
-                                rest_username = "karaf",
-                                rest_password = "karaf",
+                                rest_hostname="onos-url",
+                                rest_port="8181",
+                                rest_username="karaf",
+                                rest_password="karaf",
                                 backend_code=1,
                                 backend_status="succeeded")
 
@@ -112,8 +116,8 @@ class TestKubernetesEvent(unittest.TestCase):
 
     def test_process_event(self):
         with patch.object(FabricCrossconnectService.objects, "get_items") as fcservice_objects, \
-             patch.object(Service.objects, "get_items") as service_objects, \
-             patch.object(FabricCrossconnectServiceInstance, "save", autospec=True) as fcsi_save:
+                patch.object(Service.objects, "get_items") as service_objects, \
+                patch.object(FabricCrossconnectServiceInstance, "save", autospec=True) as fcsi_save:
             fcservice_objects.return_value = [self.fcservice]
             service_objects.return_value = [self.onos, self.fcservice]
 
@@ -132,14 +136,14 @@ class TestKubernetesEvent(unittest.TestCase):
             self.assertEqual(self.fcsi2.backend_status, "resynchronize due to kubernetes event")
 
             fcsi_save.assert_has_calls([call(self.fcsi1, update_fields=["updated", "backend_code", "backend_status"],
-                                            always_update_timestamp=True),
-                                       call(self.fcsi2, update_fields=["updated", "backend_code", "backend_status"],
-                                            always_update_timestamp=True)])
+                                             always_update_timestamp=True),
+                                        call(self.fcsi2, update_fields=["updated", "backend_code", "backend_status"],
+                                             always_update_timestamp=True)])
 
     def test_process_event_unknownstatus(self):
         with patch.object(FabricCrossconnectService.objects, "get_items") as fcservice_objects, \
-             patch.object(Service.objects, "get_items") as service_objects, \
-             patch.object(FabricCrossconnectServiceInstance, "save") as fcsi_save:
+                patch.object(Service.objects, "get_items") as service_objects, \
+                patch.object(FabricCrossconnectServiceInstance, "save") as fcsi_save:
             fcservice_objects.return_value = [self.fcservice]
             service_objects.return_value = [self.onos, self.fcservice]
 
@@ -161,8 +165,8 @@ class TestKubernetesEvent(unittest.TestCase):
 
     def test_process_event_unknownservice(self):
         with patch.object(FabricCrossconnectService.objects, "get_items") as fcservice_objects, \
-             patch.object(Service.objects, "get_items") as service_objects, \
-             patch.object(FabricCrossconnectServiceInstance, "save") as fcsi_save:
+                patch.object(Service.objects, "get_items") as service_objects, \
+                patch.object(FabricCrossconnectServiceInstance, "save") as fcsi_save:
             fcservice_objects.return_value = [self.fcservice]
             service_objects.return_value = [self.onos, self.fcservice]
 
@@ -184,8 +188,8 @@ class TestKubernetesEvent(unittest.TestCase):
 
     def test_process_event_nolabels(self):
         with patch.object(FabricCrossconnectService.objects, "get_items") as fcservice_objects, \
-             patch.object(Service.objects, "get_items") as service_objects, \
-             patch.object(FabricCrossconnectServiceInstance, "save") as fcsi_save:
+                patch.object(Service.objects, "get_items") as service_objects, \
+                patch.object(FabricCrossconnectServiceInstance, "save") as fcsi_save:
             fcservice_objects.return_value = [self.fcservice]
             service_objects.return_value = [self.onos, self.fcservice]
 
@@ -204,8 +208,6 @@ class TestKubernetesEvent(unittest.TestCase):
 
             fcsi_save.assert_not_called()
 
+
 if __name__ == '__main__':
     unittest.main()
-
-
-
