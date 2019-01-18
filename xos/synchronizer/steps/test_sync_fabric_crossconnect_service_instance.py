@@ -20,7 +20,8 @@ import requests_mock
 import multistructlog
 from multistructlog import create_logger
 
-import os, sys
+import os
+import sys
 
 # Hack to load synchronizer framework
 test_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
@@ -33,6 +34,8 @@ sys.path.append(os.path.join(xos_dir, "synchronizers", "new_base"))
 # END Hack to load synchronizer framework
 
 # generate model from xproto
+
+
 def get_models_fn(service_name, xproto_name):
     name = os.path.join(service_name, "xos", xproto_name)
     if os.path.exists(os.path.join(services_dir, name)):

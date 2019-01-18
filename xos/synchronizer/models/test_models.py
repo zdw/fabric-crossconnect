@@ -13,7 +13,8 @@
 # limitations under the License.
 
 import unittest
-import os, sys
+import os
+import sys
 from mock import patch, Mock, MagicMock
 
 test_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
@@ -24,6 +25,8 @@ if not os.path.exists(os.path.join(test_path, "new_base")):
     services_dir = os.path.join(xos_dir, "../../xos_services")
 
 # mocking XOS exception, as they're based in Django
+
+
 class Exceptions:
     XOSValidationError = Exception
     XOSProgrammingError = Exception
