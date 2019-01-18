@@ -16,12 +16,12 @@ import unittest
 import os, sys
 from mock import patch, Mock, MagicMock
 
-test_path=os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-service_dir=os.path.join(test_path, "../../../..")
-xos_dir=os.path.join(test_path, "../../..")
+test_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+service_dir = os.path.join(test_path, "../../../..")
+xos_dir = os.path.join(test_path, "../../..")
 if not os.path.exists(os.path.join(test_path, "new_base")):
-    xos_dir=os.path.join(test_path, "../../../../../../orchestration/xos/xos")
-    services_dir=os.path.join(xos_dir, "../../xos_services")
+    xos_dir = os.path.join(test_path, "../../../../../../orchestration/xos/xos")
+    services_dir = os.path.join(xos_dir, "../../xos_services")
 
 # mocking XOS exception, as they're based in Django
 class Exceptions:
@@ -29,8 +29,10 @@ class Exceptions:
     XOSProgrammingError = Exception
     XOSPermissionDenied = Exception
 
+
 class XOS:
     exceptions = Exceptions
+
 
 class TestFabricCrossconnectModels(unittest.TestCase):
     def setUp(self):
@@ -46,13 +48,12 @@ class TestFabricCrossconnectModels(unittest.TestCase):
         self.models_decl.BNGPortMapping_decl.objects = Mock()
         self.models_decl.BNGPortMapping_decl.objects.filter.return_value = []
 
-
         modules = {
-            'xos.exceptions': self.xos.exceptions,
-            'models_decl': self.models_decl
+            "xos.exceptions": self.xos.exceptions,
+            "models_decl": self.models_decl,
         }
 
-        self.module_patcher = patch.dict('sys.modules', modules)
+        self.module_patcher = patch.dict("sys.modules", modules)
         self.module_patcher.start()
 
         self.volt = Mock()
@@ -90,35 +91,36 @@ class TestFabricCrossconnectModels(unittest.TestCase):
         with self.assertRaises(Exception) as e:
             bpm.validate_range("")
 
-        self.assertEqual(e.exception.message, 'Malformed range ')
+        self.assertEqual(e.exception.message, "Malformed range ")
 
     def test_validate_range_none(self):
         bpm = self.BNGPortMapping()
         with self.assertRaises(Exception) as e:
             bpm.validate_range("")
 
-        self.assertEqual(e.exception.message, 'Malformed range ')
+        self.assertEqual(e.exception.message, "Malformed range ")
 
     def test_validate_range_all(self):
         bpm = self.BNGPortMapping()
         with self.assertRaises(Exception) as e:
             bpm.validate_range("badstring")
 
-        self.assertEqual(e.exception.message, 'Malformed range badstring')
+        self.assertEqual(e.exception.message, "Malformed range badstring")
 
     def test_validate_half_range(self):
         bpm = self.BNGPortMapping()
         with self.assertRaises(Exception) as e:
             bpm.validate_range("123-")
 
-        self.assertEqual(e.exception.message, 'Malformed range 123-')
+        self.assertEqual(e.exception.message, "Malformed range 123-")
 
     def test_validate_half_comma(self):
         bpm = self.BNGPortMapping()
         with self.assertRaises(Exception) as e:
             bpm.validate_range("123,")
 
-        self.assertEqual(e.exception.message, 'Malformed range 123,')
+        self.assertEqual(e.exception.message, "Malformed range 123,")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

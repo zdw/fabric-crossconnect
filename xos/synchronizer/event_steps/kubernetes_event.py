@@ -1,4 +1,3 @@
-
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +17,16 @@ import json
 import os
 import sys
 from synchronizers.new_base.eventstep import EventStep
-from synchronizers.new_base.modelaccessor import FabricCrossconnectService, FabricCrossconnectServiceInstance, Service
+from synchronizers.new_base.modelaccessor import (
+    FabricCrossconnectService,
+    FabricCrossconnectServiceInstance,
+    Service,
+)
 from xosconfig import Config
 from multistructlog import create_logger
 
-log = create_logger(Config().get('logging'))
+log = create_logger(Config().get("logging"))
+
 
 class KubernetesPodDetailsEventStep(EventStep):
     topics = ["xos.kubernetes.pod-details"]
@@ -36,17 +40,21 @@ class KubernetesPodDetailsEventStep(EventStep):
         service = Service.objects.get(id=service.id)
 
         # get the onos_fabric service
-        fabric_onos = [s.leaf_model for s in service.provider_services if "onos" in s.name.lower()]
+        fabric_onos = [
+            s.leaf_model for s in service.provider_services if "onos" in s.name.lower()
+        ]
 
         if len(fabric_onos) == 0:
-            raise Exception('Cannot find ONOS service in provider_services of Fabric-Crossconnect')
+            raise Exception(
+                "Cannot find ONOS service in provider_services of Fabric-Crossconnect"
+            )
 
         return fabric_onos[0]
 
     def process_event(self, event):
         value = json.loads(event.value)
 
-        if (value.get("status") != "created"):
+        if value.get("status") != "created":
             return
 
         if "labels" not in value:
@@ -58,11 +66,19 @@ class KubernetesPodDetailsEventStep(EventStep):
 
         for service in FabricCrossconnectService.objects.all():
             fabric_onos = KubernetesPodDetailsEventStep.get_fabric_onos(service)
-            if (fabric_onos.name.lower() != xos_service.lower()):
+            if fabric_onos.name.lower() != xos_service.lower():
                 continue
 
             for service_instance in service.service_instances.all():
-                log.info("Dirtying FabricCrossconnectServiceInstance", service_instance=service_instance)
-                service_instance.backend_code=0
-                service_instance.backend_status="resynchronize due to kubernetes event"
-                service_instance.save(update_fields=["updated", "backend_code", "backend_status"], always_update_timestamp=True)
+                log.info(
+                    "Dirtying FabricCrossconnectServiceInstance",
+                    service_instance=service_instance,
+                )
+                service_instance.backend_code = 0
+                service_instance.backend_status = (
+                    "resynchronize due to kubernetes event"
+                )
+                service_instance.save(
+                    update_fields=["updated", "backend_code", "backend_status"],
+                    always_update_timestamp=True,
+                )

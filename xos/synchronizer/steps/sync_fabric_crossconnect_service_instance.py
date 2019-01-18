@@ -13,7 +13,12 @@
 # limitations under the License.
 
 from synchronizers.new_base.syncstep import SyncStep, DeferredException
-from synchronizers.new_base.modelaccessor import model_accessor, FabricCrossconnectServiceInstance, ServiceInstance, BNGPortMapping
+from synchronizers.new_base.modelaccessor import (
+    model_accessor,
+    FabricCrossconnectServiceInstance,
+    ServiceInstance,
+    BNGPortMapping,
+)
 
 from xosconfig import Config
 from multistructlog import create_logger
@@ -24,16 +29,16 @@ from requests.auth import HTTPBasicAuth
 
 class SyncFabricCrossconnectServiceInstance(SyncStep):
     provides = [FabricCrossconnectServiceInstance]
-    log = create_logger(Config().get('logging'))
+    log = create_logger(Config().get("logging"))
 
     observes = FabricCrossconnectServiceInstance
 
     @staticmethod
     def format_url(url):
-        if 'http' in url:
+        if "http" in url:
             return url
         else:
-            return 'http://%s' % url
+            return "http://%s" % url
 
     @staticmethod
     def get_fabric_onos_info(si):
@@ -42,17 +47,25 @@ class SyncFabricCrossconnectServiceInstance(SyncStep):
         fabric_crossconnect = si.owner
 
         # get the onos_fabric service
-        fabric_onos = [s.leaf_model for s in fabric_crossconnect.provider_services if "onos" in s.name.lower()]
+        fabric_onos = [
+            s.leaf_model
+            for s in fabric_crossconnect.provider_services
+            if "onos" in s.name.lower()
+        ]
 
         if len(fabric_onos) == 0:
-            raise Exception('Cannot find ONOS service in provider_services of Fabric-Crossconnect')
+            raise Exception(
+                "Cannot find ONOS service in provider_services of Fabric-Crossconnect"
+            )
 
         fabric_onos = fabric_onos[0]
 
         return {
-            'url': SyncFabricCrossconnectServiceInstance.format_url("%s:%s" % (fabric_onos.rest_hostname, fabric_onos.rest_port)),
-            'user': fabric_onos.rest_username,
-            'pass': fabric_onos.rest_password
+            "url": SyncFabricCrossconnectServiceInstance.format_url(
+                "%s:%s" % (fabric_onos.rest_hostname, fabric_onos.rest_port)
+            ),
+            "user": fabric_onos.rest_username,
+            "pass": fabric_onos.rest_password,
         }
 
     def make_handle(self, s_tag, switch_datapath_id):
@@ -62,24 +75,24 @@ class SyncFabricCrossconnectServiceInstance(SyncStep):
         return "%d/%s" % (s_tag, switch_datapath_id)
 
     def extract_handle(self, backend_handle):
-        (s_tag, switch_datapath_id) = backend_handle.split("/",1)
+        (s_tag, switch_datapath_id) = backend_handle.split("/", 1)
         s_tag = int(s_tag)
         return (s_tag, switch_datapath_id)
 
     def range_matches(self, value, pattern):
-        value=int(value)
+        value = int(value)
         for this_range in pattern.split(","):
             this_range = this_range.strip()
             if "-" in this_range:
                 (first, last) = this_range.split("-")
                 first = int(first.strip())
                 last = int(last.strip())
-                if (value>=first) and (value<=last):
+                if (value >= first) and (value <= last):
                     return True
-            elif this_range.lower()=="any":
+            elif this_range.lower() == "any":
                 return True
             else:
-                if (value==int(this_range)):
+                if value == int(this_range):
                     return True
         return False
 
@@ -95,12 +108,14 @@ class SyncFabricCrossconnectServiceInstance(SyncStep):
         # See if there are any ranges or "any" that match
         for bng_mapping in BNGPortMapping.objects.all():
             if self.range_matches(s_tag, bng_mapping.s_tag):
-                 return bng_mapping
+                return bng_mapping
 
         return None
 
     def sync_record(self, o):
-        self.log.info("Sync'ing Fabric Crossconnect Service Instance", service_instance=o)
+        self.log.info(
+            "Sync'ing Fabric Crossconnect Service Instance", service_instance=o
+        )
 
         if (o.policed is None) or (o.policed < o.updated):
             raise DeferredException("Waiting for model_policy to run on fcsi %s" % o.id)
@@ -109,29 +124,42 @@ class SyncFabricCrossconnectServiceInstance(SyncStep):
 
         si = ServiceInstance.objects.get(id=o.id)
 
-        if (o.s_tag is None):
-            raise Exception("Cannot sync FabricCrossconnectServiceInstance if s_tag is None on fcsi %s" % o.id)
+        if o.s_tag is None:
+            raise Exception(
+                "Cannot sync FabricCrossconnectServiceInstance if s_tag is None on fcsi %s"
+                % o.id
+            )
 
-        if (o.source_port is None):
-            raise Exception("Cannot sync FabricCrossconnectServiceInstance if source_port is None on fcsi %s" % o.id)
+        if o.source_port is None:
+            raise Exception(
+                "Cannot sync FabricCrossconnectServiceInstance if source_port is None on fcsi %s"
+                % o.id
+            )
 
-        if (not o.switch_datapath_id):
-            raise Exception("Cannot sync FabricCrossconnectServiceInstance if switch_datapath_id is unset on fcsi %s" % o.id)
+        if not o.switch_datapath_id:
+            raise Exception(
+                "Cannot sync FabricCrossconnectServiceInstance if switch_datapath_id is unset on fcsi %s"
+                % o.id
+            )
 
-        bng_mapping = self.find_bng(s_tag = o.s_tag)
+        bng_mapping = self.find_bng(s_tag=o.s_tag)
         if not bng_mapping:
             raise Exception("Unable to determine BNG port for s_tag %s" % o.s_tag)
         east_port = bng_mapping.switch_port
 
-        data = { "deviceId": o.switch_datapath_id,
-                 "vlanId": o.s_tag,
-                 "ports": [ int(o.source_port), int(east_port) ] }
+        data = {
+            "deviceId": o.switch_datapath_id,
+            "vlanId": o.s_tag,
+            "ports": [int(o.source_port), int(east_port)],
+        }
 
-        url = onos['url'] + '/onos/segmentrouting/xconnect'
+        url = onos["url"] + "/onos/segmentrouting/xconnect"
 
         self.log.info("Sending request to ONOS", url=url, body=data)
 
-        r = requests.post(url, json=data, auth=HTTPBasicAuth(onos['user'], onos['pass']))
+        r = requests.post(
+            url, json=data, auth=HTTPBasicAuth(onos["user"], onos["pass"])
+        )
 
         if r.status_code != 200:
             raise Exception("Failed to create fabric crossconnect in ONOS: %s" % r.text)
@@ -147,7 +175,9 @@ class SyncFabricCrossconnectServiceInstance(SyncStep):
         self.log.info("ONOS response", res=r.text)
 
     def delete_record(self, o):
-        self.log.info("Deleting Fabric Crossconnect Service Instance", service_instance=o)
+        self.log.info(
+            "Deleting Fabric Crossconnect Service Instance", service_instance=o
+        )
 
         if o.backend_handle:
             onos = self.get_fabric_onos_info(o)
@@ -155,14 +185,17 @@ class SyncFabricCrossconnectServiceInstance(SyncStep):
             # backend_handle has everything we need in it to delete this entry.
             (s_tag, switch_datapath_id) = self.extract_handle(o.backend_handle)
 
-            data = { "deviceId": switch_datapath_id,
-                     "vlanId": s_tag }
+            data = {"deviceId": switch_datapath_id, "vlanId": s_tag}
 
-            url = onos['url'] + '/onos/segmentrouting/xconnect'
+            url = onos["url"] + "/onos/segmentrouting/xconnect"
 
-            r = requests.delete(url, json=data, auth=HTTPBasicAuth(onos['user'], onos['pass']))
+            r = requests.delete(
+                url, json=data, auth=HTTPBasicAuth(onos["user"], onos["pass"])
+            )
 
             if r.status_code != 204:
-                raise Exception("Failed to remove fabric crossconnect in ONOS: %s" % r.text)
+                raise Exception(
+                    "Failed to remove fabric crossconnect in ONOS: %s" % r.text
+                )
 
             self.log.info("ONOS response", res=r.text)
