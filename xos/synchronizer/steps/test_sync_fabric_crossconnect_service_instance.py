@@ -15,10 +15,8 @@
 import unittest
 
 import functools
-from mock import patch, call, Mock, PropertyMock, MagicMock
+from mock import patch, Mock
 import requests_mock
-import multistructlog
-from multistructlog import create_logger
 
 import os
 import sys
@@ -86,11 +84,11 @@ class TestSyncFabricCrossconnectServiceInstance(unittest.TestCase):
             services_dir,
             [get_models_fn("fabric-crossconnect", "fabric-crossconnect.xproto")],
         )
-        import synchronizers.new_base.modelaccessor
+
+        from synchronizers.new_base.modelaccessor import model_accessor
 
         from sync_fabric_crossconnect_service_instance import (
             SyncFabricCrossconnectServiceInstance,
-            model_accessor,
             DeferredException,
         )
 
@@ -248,9 +246,7 @@ class TestSyncFabricCrossconnectServiceInstance(unittest.TestCase):
     def test_sync_no_bng_mapping(self):
         with patch.object(
             ServiceInstance.objects, "get_items"
-        ) as serviceinstance_objects, patch.object(
-            FabricCrossconnectServiceInstance, "save"
-        ) as fcsi_save:
+        ) as serviceinstance_objects:
 
             fsi = FabricCrossconnectServiceInstance(
                 id=7777,
@@ -274,9 +270,7 @@ class TestSyncFabricCrossconnectServiceInstance(unittest.TestCase):
     def test_sync_not_policed(self):
         with patch.object(
             ServiceInstance.objects, "get_items"
-        ) as serviceinstance_objects, patch.object(
-            FabricCrossconnectServiceInstance, "save"
-        ) as fcsi_save:
+        ) as serviceinstance_objects:
 
             fsi = FabricCrossconnectServiceInstance(
                 id=7777,
@@ -299,9 +293,7 @@ class TestSyncFabricCrossconnectServiceInstance(unittest.TestCase):
     def test_sync_no_s_tag(self):
         with patch.object(
             ServiceInstance.objects, "get_items"
-        ) as serviceinstance_objects, patch.object(
-            FabricCrossconnectServiceInstance, "save"
-        ) as fcsi_save:
+        ) as serviceinstance_objects:
 
             fsi = FabricCrossconnectServiceInstance(
                 id=7777,
@@ -325,9 +317,7 @@ class TestSyncFabricCrossconnectServiceInstance(unittest.TestCase):
     def test_sync_no_switch_datapath_id(self):
         with patch.object(
             ServiceInstance.objects, "get_items"
-        ) as serviceinstance_objects, patch.object(
-            FabricCrossconnectServiceInstance, "save"
-        ) as fcsi_save:
+        ) as serviceinstance_objects:
 
             fsi = FabricCrossconnectServiceInstance(
                 id=7777,
@@ -351,9 +341,7 @@ class TestSyncFabricCrossconnectServiceInstance(unittest.TestCase):
     def test_sync_no_source_port(self):
         with patch.object(
             ServiceInstance.objects, "get_items"
-        ) as serviceinstance_objects, patch.object(
-            FabricCrossconnectServiceInstance, "save"
-        ) as fcsi_save:
+        ) as serviceinstance_objects:
 
             fsi = FabricCrossconnectServiceInstance(
                 id=7777,
@@ -378,9 +366,8 @@ class TestSyncFabricCrossconnectServiceInstance(unittest.TestCase):
     def test_delete(self, m):
         with patch.object(
             FabricCrossconnectServiceInstance.objects, "get_items"
-        ) as fcsi_objects, patch.object(
-            FabricCrossconnectServiceInstance, "save"
-        ) as fcsi_save:
+        ) as fcsi_objects:
+
             fsi = FabricCrossconnectServiceInstance(
                 id=7777,
                 owner=self.service,

@@ -13,13 +13,8 @@
 # limitations under the License.
 
 
-from synchronizers.new_base.modelaccessor import (
-    FabricCrossconnectServiceInstance,
-    ServiceInstance,
-    model_accessor,
-)
+from synchronizers.new_base.modelaccessor import FabricCrossconnectServiceInstance
 from synchronizers.new_base.policy import Policy
-from synchronizers.new_base.exceptions import *
 
 from xosconfig import Config
 from multistructlog import create_logger

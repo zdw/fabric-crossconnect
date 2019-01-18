@@ -14,9 +14,7 @@
 
 import unittest
 import json
-import functools
-from mock import patch, call, Mock, PropertyMock
-import requests_mock
+from mock import patch, call, Mock
 
 import os
 import sys
