@@ -14,7 +14,11 @@
 
 from xos.exceptions import XOSValidationError
 
-from models_decl import FabricCrossconnectService_decl, FabricCrossconnectServiceInstance_decl, BNGPortMapping_decl
+from models_decl import (
+    FabricCrossconnectService_decl,
+    FabricCrossconnectServiceInstance_decl,
+    BNGPortMapping_decl,
+)
 
 
 class FabricCrossconnectService(FabricCrossconnectService_decl):

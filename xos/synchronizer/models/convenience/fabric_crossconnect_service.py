@@ -1,4 +1,3 @@
-
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,30 +31,38 @@ class ORMWrapperFabricCrossconnectService(ORMWrapperService):
               1) If there is an eligible provider_service_instance that can be used, then link to it
               2) Otherwise, create a new provider_service_instance and link to it.
         """
-        (s_tag, switch_datapath_id, source_port) = self._get_west_fields(subscriber_service_instance)
+        (s_tag, switch_datapath_id, source_port) = self._get_west_fields(
+            subscriber_service_instance
+        )
 
         FabricCrossconnectServiceInstance = self.stub.FabricCrossconnectServiceInstance
         ServiceInstanceLink = self.stub.ServiceInstanceLink
 
-        candidates = FabricCrossconnectServiceInstance.objects.filter(owner_id=self.id,
-                                                                      s_tag=s_tag,
-                                                                      switch_datapath_id=switch_datapath_id,
-                                                                      source_port=source_port)
+        candidates = FabricCrossconnectServiceInstance.objects.filter(
+            owner_id=self.id,
+            s_tag=s_tag,
+            switch_datapath_id=switch_datapath_id,
+            source_port=source_port,
+        )
 
         if candidates:
             provider_service_instance = candidates[0]
         else:
-            provider_service_instance = FabricCrossconnectServiceInstance(owner=self,
-                                                                          s_tag=s_tag,
-                                                                          switch_datapath_id=switch_datapath_id,
-                                                                          source_port=source_port)
+            provider_service_instance = FabricCrossconnectServiceInstance(
+                owner=self,
+                s_tag=s_tag,
+                switch_datapath_id=switch_datapath_id,
+                source_port=source_port,
+            )
             provider_service_instance.save()
 
         # NOTE: Lack-of-atomicity vulnerability -- provider_service_instance could be deleted before we created the
         # link.
 
-        link = ServiceInstanceLink(provider_service_instance=provider_service_instance,
-                                   subscriber_service_instance=subscriber_service_instance)
+        link = ServiceInstanceLink(
+            provider_service_instance=provider_service_instance,
+            subscriber_service_instance=subscriber_service_instance,
+        )
         link.save()
 
         return provider_service_instance
@@ -71,14 +78,19 @@ class ORMWrapperFabricCrossconnectService(ORMWrapperService):
         if not subscriber_service_instance.subscribed_links.exists():
             return None
 
-        (s_tag, switch_datapath_id, source_port) = self._get_west_fields(subscriber_service_instance)
+        (s_tag, switch_datapath_id, source_port) = self._get_west_fields(
+            subscriber_service_instance
+        )
 
         matched = []
         for link in subscriber_service_instance.subscribed_links.all():
             if link.provider_service_instance.owner.id == self.id:
                 fcsi = link.provider_service_instance.leaf_model
-                if (fcsi.s_tag == s_tag) and (fcsi.switch_datapath_id == switch_datapath_id) and \
-                        (fcsi.source_port == source_port):
+                if (
+                    (fcsi.s_tag == s_tag)
+                    and (fcsi.switch_datapath_id == switch_datapath_id)
+                    and (fcsi.source_port == source_port)
+                ):
                     matched.append(fcsi)
                 else:
                     link.delete()
@@ -91,19 +103,31 @@ class ORMWrapperFabricCrossconnectService(ORMWrapperService):
             FabricCrossconnectServiceInstance.
         """
 
-        s_tag = subscriber_si.get_westbound_service_instance_properties("s_tag", include_self=True)
+        s_tag = subscriber_si.get_westbound_service_instance_properties(
+            "s_tag", include_self=True
+        )
         switch_datapath_id = subscriber_si.get_westbound_service_instance_properties(
-            "switch_datapath_id", include_self=True)
-        source_port = subscriber_si.get_westbound_service_instance_properties("switch_port", include_self=True)
+            "switch_datapath_id", include_self=True
+        )
+        source_port = subscriber_si.get_westbound_service_instance_properties(
+            "switch_port", include_self=True
+        )
 
-        if (s_tag is None):
-            raise Exception("Subscriber ServiceInstance %s s-tag is None" % subscriber_si.id)
+        if s_tag is None:
+            raise Exception(
+                "Subscriber ServiceInstance %s s-tag is None" % subscriber_si.id
+            )
 
-        if (not switch_datapath_id):
-            raise Exception("Subscriber ServiceInstance %s switch_datapath_id is unset" % subscriber_si.id)
+        if not switch_datapath_id:
+            raise Exception(
+                "Subscriber ServiceInstance %s switch_datapath_id is unset"
+                % subscriber_si.id
+            )
 
-        if (source_port is None):
-            raise Exception("Subscriber ServiceInstance %s switch_port is None" % subscriber_si.id)
+        if source_port is None:
+            raise Exception(
+                "Subscriber ServiceInstance %s switch_port is None" % subscriber_si.id
+            )
 
         s_tag = int(s_tag)
         source_port = int(source_port)
@@ -111,4 +135,6 @@ class ORMWrapperFabricCrossconnectService(ORMWrapperService):
         return (s_tag, switch_datapath_id, source_port)
 
 
-register_convenience_wrapper("FabricCrossconnectService", ORMWrapperFabricCrossconnectService)
+register_convenience_wrapper(
+    "FabricCrossconnectService", ORMWrapperFabricCrossconnectService
+)

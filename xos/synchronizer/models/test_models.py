@@ -52,11 +52,11 @@ class TestFabricCrossconnectModels(unittest.TestCase):
         self.models_decl.BNGPortMapping_decl.objects.filter.return_value = []
 
         modules = {
-            'xos.exceptions': self.xos.exceptions,
-            'models_decl': self.models_decl
+            "xos.exceptions": self.xos.exceptions,
+            "models_decl": self.models_decl,
         }
 
-        self.module_patcher = patch.dict('sys.modules', modules)
+        self.module_patcher = patch.dict("sys.modules", modules)
         self.module_patcher.start()
 
         self.volt = Mock()
@@ -94,36 +94,36 @@ class TestFabricCrossconnectModels(unittest.TestCase):
         with self.assertRaises(Exception) as e:
             bpm.validate_range("")
 
-        self.assertEqual(e.exception.message, 'Malformed range ')
+        self.assertEqual(e.exception.message, "Malformed range ")
 
     def test_validate_range_none(self):
         bpm = self.BNGPortMapping()
         with self.assertRaises(Exception) as e:
             bpm.validate_range("")
 
-        self.assertEqual(e.exception.message, 'Malformed range ')
+        self.assertEqual(e.exception.message, "Malformed range ")
 
     def test_validate_range_all(self):
         bpm = self.BNGPortMapping()
         with self.assertRaises(Exception) as e:
             bpm.validate_range("badstring")
 
-        self.assertEqual(e.exception.message, 'Malformed range badstring')
+        self.assertEqual(e.exception.message, "Malformed range badstring")
 
     def test_validate_half_range(self):
         bpm = self.BNGPortMapping()
         with self.assertRaises(Exception) as e:
             bpm.validate_range("123-")
 
-        self.assertEqual(e.exception.message, 'Malformed range 123-')
+        self.assertEqual(e.exception.message, "Malformed range 123-")
 
     def test_validate_half_comma(self):
         bpm = self.BNGPortMapping()
         with self.assertRaises(Exception) as e:
             bpm.validate_range("123,")
 
-        self.assertEqual(e.exception.message, 'Malformed range 123,')
+        self.assertEqual(e.exception.message, "Malformed range 123,")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
